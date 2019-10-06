@@ -12,7 +12,10 @@ services:
     environment:
       SERVICE_NAME: app
       SERVICE_TAGS: dev
-    working_dir: ./
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - app-network
   #nginx service
@@ -24,6 +27,9 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
     networks:
       - app-network
   #mysql service
@@ -35,10 +41,14 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_DATABASE: laravel
-      MYSQL_ROOT_PASSWORD: your_mysql_root_password
+      MYSQL_DATABASE: homestead
+      MYSQL_ROOT_PASSWORD: 2001
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
+    command: --disable-partition-engine-check
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
     networks:
       - app-network
 
@@ -46,3 +56,7 @@ services:
 networks:
   app-network:
     driver: bridge
+#Volumes
+volumes:
+  dbdata:
+    driver: local
