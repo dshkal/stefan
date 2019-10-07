@@ -8,6 +8,8 @@
 </head>
 <body>
     {!! $ssr !!}
+{{--    <div id="app"></div>--}}
+    {{env('DB_HOST')}}
     <script src="{{ asset('js/entry-client.js') }}" type="text/javascript"></script>
 </body>
 </html>

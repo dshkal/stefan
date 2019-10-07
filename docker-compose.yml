@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 services:
   # php service
   app:
@@ -9,15 +9,21 @@ services:
     container_name: app
     restart: unless-stopped
     tty: true
+    env_file:
+      - .env
     environment:
-      SERVICE_NAME: app
-      SERVICE_TAGS: dev
+      - DB_HOST=mysql-db
+#    environment:
+#      SERVICE_NAME: app
+#      SERVICE_TAGS: dev
     working_dir: /var/www
     volumes:
       - ./:/var/www
       - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
-      - app-network
+      backend:
+        aliases:
+          - app
   #nginx service
   webserwer:
     image: nginx:alpine
@@ -31,31 +37,35 @@ services:
       - ./:/var/www
       - ./nginx/conf.d/:/etc/nginx/conf.d/
     networks:
-      - app-network
+      backend:
+        aliases:
+          - webserwer
   #mysql service
-  db:
+  mysql-db:
     image: mysql:5.7.22
-    container_name: db
+    container_name: mysql-db
     restart: unless-stopped
     tty: true
     ports:
-      - "3306:3306"
+      - 3306
+#      - "8083:3306"
     environment:
-      MYSQL_DATABASE: homestead
-      MYSQL_ROOT_PASSWORD: 2001
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
     command: --disable-partition-engine-check
     volumes:
       - dbdata:/var/lib/mysql
       - ./mysql/my.cnf:/etc/mysql/my.cnf
     networks:
-      - app-network
+      backend:
+        aliases:
+          - db
 
 #Docker Networks
 networks:
-  app-network:
-    driver: bridge
+  backend:
+    name: app-network
 #Volumes
 volumes:
   dbdata:
