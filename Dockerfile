@@ -65,13 +65,13 @@ RUN cd /tmp/v8js && ./configure LDFLAGS="-lstdc++" --with-v8js=/opt/v8
 RUN cd /tmp/v8js && make
 RUN cd /tmp/v8js && make test
 RUN cd /tmp/v8js && make install
-#RUN echo extension=v8js.so >> /usr/local/etc/php/conf.d/v8js.ini
+RUN echo extension=v8js.so >> /usr/local/etc/php/conf.d/v8js.ini
 #
-#RUN curl -L -o /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar
-#RUN chmod +x /usr/local/bin/phpunit
-#
-#RUN curl -L -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-#RUN chmod +x /usr/local/bin/wp
+RUN curl -L -o /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar
+RUN chmod +x /usr/local/bin/phpunit
+
+RUN curl -L -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN chmod +x /usr/local/bin/wp
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -83,6 +83,12 @@ RUN docker-php-ext-install gd
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+#RUN cd /var/www && rm -rf node_module && npm i && npm i -y vue \
+#     vue-server-renderer \
+#     vue-router
+
+#RUN cd /var/www/ && npm run prod
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
