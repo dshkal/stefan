@@ -1,0 +1,72 @@
+version: '3.5'
+services:
+  # php service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: digitalocean.com/php
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=mysql-db
+#    environment:
+#      SERVICE_NAME: app
+#      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      backend:
+        aliases:
+          - app
+  #nginx service
+  webserwer:
+    image: nginx:alpine
+    container_name: webserwer
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      backend:
+        aliases:
+          - webserwer
+  #mysql service
+  mysql-db:
+    image: mysql:5.7.22
+    container_name: mysql-db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 3306
+#      - "8083:3306"
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    command: --disable-partition-engine-check
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      backend:
+        aliases:
+          - db
+
+#Docker Networks
+networks:
+  backend:
+    name: app-network
+#Volumes
+volumes:
+  dbdata:
+    driver: local
